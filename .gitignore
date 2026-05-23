@@ -1,3 +1,7 @@
 .venv/
 output/
 assets/
+yolo_dataset/
+runs/
+yolo26n-seg.pt
+.vscode/
