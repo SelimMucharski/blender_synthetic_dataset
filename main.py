@@ -131,9 +131,6 @@ light_plane_material = bproc.material.create('light_material')
 light_point = bproc.types.Light()
 light_point.set_energy(200)
 
-# load cc_textures
-# cc_textures = bproc.loader.load_ccmaterials(cc_textures_path)
-
 # Define a function that samples 6-DoF poses
 def sample_pose_func(obj: bproc.types.MeshObject):
     min = np.random.uniform([-0.3, -0.3, 0.0], [-0.2, -0.2, 0.0])
@@ -146,7 +143,7 @@ bproc.renderer.enable_depth_output(activate_antialiasing=False)
 bproc.renderer.set_max_amount_of_samples(50)
 
 
-for i in tqdm(range(1)):
+for i in tqdm(range(100)):
     random_cc_texture = np.random.choice(cc_textures)
     for plane in room_planes:
         plane.replace_materials(random_cc_texture)
@@ -197,7 +194,7 @@ for i in tqdm(range(1)):
     bop_bvh_tree = bproc.object.create_bvh_tree_multi_objects(sampled_target_bop_objs + sampled_distractor_bop_objs)
 
     cam_poses = 0
-    while cam_poses < 25:
+    while cam_poses < 5:
         # Sample location
         location = bproc.sampler.shell(center = [0, 0, 0],
                                 radius_min = 0.3,
@@ -206,8 +203,12 @@ for i in tqdm(range(1)):
                                 elevation_max = 89)
         # Determine point of interest in scene as the object closest to the mean of a subset of objects
         poi = bproc.object.compute_poi(np.random.choice(sampled_target_bop_objs, size=1, replace=False))
+
+        poi_offset = np.random.uniform([-0.2, -0.2, -0.2], [0.2, 0.2, 0.2])
+        shifted_poi = poi + poi_offset
+
         # Compute rotation based on vector going from location towards poi
-        rotation_matrix = bproc.camera.rotation_from_forward_vec(poi - location, inplane_rot=np.random.uniform(-3.14159, 3.14159))
+        rotation_matrix = bproc.camera.rotation_from_forward_vec(shifted_poi - location, inplane_rot=np.random.uniform(-3.14159, 3.14159))
         # Add homog cam pose based on location an rotation
         cam2world_matrix = bproc.math.build_transformation_mat(location, rotation_matrix)
         
