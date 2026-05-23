@@ -61,8 +61,57 @@ for obj in (target_objs + hp_dist_bop_objs + tless_dist_bop_objs + ycbv_dist_bop
 
 # create room
 
+def load_custom_pbr_materials(base_path):
+    """
+    Przeszukuje foldery w base_path i tworzy z nich pełne materiały PBR dla BlenderProc.
+    """
+    materials = []
+    
+    # Przechodzimy przez wszystkie podfoldery (np. assets/terrain/full-textures/*)
+    for folder_name in os.listdir(base_path):
+        folder_path = os.path.join(base_path, folder_name)
+        if not os.path.isdir(folder_path):
+            continue
+            
+        # Tworzymy nowy czysty materiał w BlenderProc
+        mat = bproc.material.create(f"custom_mat_{folder_name}")
+        
+        # Szukamy plików wewnątrz folderu tekstury
+        files = os.listdir(folder_path)
+        
+        color_file = next((f for f in files if 'color' in f.lower() or 'albedo' in f.lower()), None)
+        normal_file = next((f for f in files if 'normal' in f.lower()), None)
+        bump_file = next((f for f in files if 'bump' in f.lower() or 'roughness' in f.lower()), None)
+        
+        # 1. Ładowanie tekstury koloru (Base Color)
+        if color_file:
+            color_image = bpy.data.images.load(os.path.join(folder_path, color_file))
+            mat.set_principled_shader_value("Base Color", color_image)
+            
+        # 2. Ładowanie mapy normalnych (Normal Map)
+        if normal_file:
+            normal_image = bpy.data.images.load(os.path.join(folder_path, normal_file))
+            # W BlenderProc mapę normalnych podpinamy przez dedykowaną funkcję, aby stworzyć węzeł Normal Map
+            mat.set_principled_shader_value("Normal", normal_image)
+            
+        # 3. Ładowanie chropowatości (Roughness) lub bumpa jako zastępstwa
+        if bump_file:
+            bump_image = bpy.data.images.load(os.path.join(folder_path, bump_file))
+            mat.set_principled_shader_value("Roughness", bump_image)
+        else:
+            # Jeśli nie ma pliku bump/roughness, ustaw losową stałą chropowatość
+            mat.set_principled_shader_value("Roughness", np.random.uniform(0.4, 0.9))
+            
+        materials.append(mat)
+        
+    return materials
+
 terrain_dir = os.path.join(assets_path, 'terrain')
 terrain_images = [os.path.join(terrain_dir, f"{i}.jpg") for i in range(9)]
+
+custom_textures_path = os.path.join(terrain_dir, 'full-textures')
+cc_textures = load_custom_pbr_materials(custom_textures_path)
+
 room_material = bproc.material.create('room_terrain_material')
 
 room_planes = [bproc.object.create_primitive('PLANE', scale=[2, 2, 1]),
@@ -98,15 +147,9 @@ bproc.renderer.set_max_amount_of_samples(50)
 
 
 for i in tqdm(range(1)):
-    random_terrain_path = np.random.choice(terrain_images)
-
-    import bpy
-    blender_image = bpy.data.images.load(random_terrain_path)
-
-    room_material.set_principled_shader_value("Base Color", blender_image)
-    
+    random_cc_texture = np.random.choice(cc_textures)
     for plane in room_planes:
-        plane.replace_materials(room_material)
+        plane.replace_materials(random_cc_texture)
 
     # Sample bop objects for a scene
     sampled_target_bop_objs = list(np.random.choice(target_objs, size=1, replace=False))
