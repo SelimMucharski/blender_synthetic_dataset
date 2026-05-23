@@ -1,4 +1,5 @@
 import blenderproc as bproc
+import bpy
 import argparse
 import os
 import numpy as np
@@ -59,6 +60,11 @@ for obj in (target_objs + hp_dist_bop_objs + tless_dist_bop_objs + ycbv_dist_bop
     
 
 # create room
+
+terrain_dir = os.path.join(assets_path, 'terrain')
+terrain_images = [os.path.join(terrain_dir, f"{i}.jpg") for i in range(9)]
+room_material = bproc.material.create('room_terrain_material')
+
 room_planes = [bproc.object.create_primitive('PLANE', scale=[2, 2, 1]),
                bproc.object.create_primitive('PLANE', scale=[2, 2, 1], location=[0, -2, 2], rotation=[-1.570796, 0, 0]),
                bproc.object.create_primitive('PLANE', scale=[2, 2, 1], location=[0, 2, 2], rotation=[1.570796, 0, 0]),
@@ -91,7 +97,16 @@ bproc.renderer.enable_depth_output(activate_antialiasing=False)
 bproc.renderer.set_max_amount_of_samples(50)
 
 
-for i in tqdm(range(1000)):
+for i in tqdm(range(1)):
+    random_terrain_path = np.random.choice(terrain_images)
+
+    import bpy
+    blender_image = bpy.data.images.load(random_terrain_path)
+
+    room_material.set_principled_shader_value("Base Color", blender_image)
+    
+    for plane in room_planes:
+        plane.replace_materials(room_material)
 
     # Sample bop objects for a scene
     sampled_target_bop_objs = list(np.random.choice(target_objs, size=1, replace=False))
@@ -122,12 +137,6 @@ for i in tqdm(range(1000)):
     location = bproc.sampler.shell(center = [0, 0, 0], radius_min = 1, radius_max = 1.5,
                             elevation_min = 5, elevation_max = 89)
     light_point.set_location(location)
-
-    # # sample CC Texture and assign to room planes
-    # random_cc_texture = np.random.choice(cc_textures)
-    # for plane in room_planes:
-    #     plane.replace_materials(random_cc_texture)
-
 
     # Sample object poses and check collisions 
     bproc.object.sample_poses(objects_to_sample = sampled_target_bop_objs + sampled_distractor_bop_objs,
