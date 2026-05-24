@@ -10,7 +10,7 @@ def main():
         epochs=50, 
         imgsz=640,
         # Poprawne parametry zmiany kolorów/jasności (HSV)
-        hsv_h=0.015,  # Losowy odcień (0.0 - 1.0)
+        hsv_h=0.2,  # Losowy odcień (0.0 - 1.0)
         hsv_s=0.7,    # Losowe nasycenie (0.0 - 1.0)
         hsv_v=0.4,    # Losowa jasność (0.0 - 1.0)
         # Dodatkowe mocne augmentacje niszczące idealną geometrię i tekstury:
