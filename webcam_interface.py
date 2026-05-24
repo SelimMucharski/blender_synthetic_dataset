@@ -4,7 +4,7 @@ from ultralytics import YOLO
 def main():
     # 1. Wczytaj swoje najlepsze wytrenowane wagi
     # Jeśli trenowałeś model wielokrotnie, upewnij się, że ścieżka 'train' jest poprawna (np. train2, train3 itd.)
-    model_path = "runs/segment/train-4/weights/best.pt"
+    model_path = "runs/segment/train-6/weights/best.pt"
     
     print(f"Ładowanie modelu z: {model_path}...")
     model = YOLO(model_path)
@@ -34,7 +34,7 @@ def main():
         # 3. Uruchomienie predykcji YOLO na bieżącej klatce
         # verbose=False wycisza potok logów w konsoli, aby obraz działał płynniej
         # conf=0.5 oznacza próg pewności - model pokaże obiekt tylko, jeśli jest pewien na min. 50%
-        results = model.predict(frame, conf=0.1, verbose=False)
+        results = model.predict(frame, conf=0.5, verbose=False)
 
         # 4. Automatyczne renderowanie masek i ramek na klatce
         # Metoda .plot() tworzy kopię obrazu z nałożonymi detekcjami
