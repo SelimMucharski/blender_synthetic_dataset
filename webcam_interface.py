@@ -4,7 +4,7 @@ from ultralytics import YOLO
 def main():
     # 1. Wczytaj swoje najlepsze wytrenowane wagi
     # Jeśli trenowałeś model wielokrotnie, upewnij się, że ścieżka 'train' jest poprawna (np. train2, train3 itd.)
-    model_path = "runs/segment/train/weights/best.pt"
+    model_path = "runs/segment/train-4/weights/best.pt"
     
     print(f"Ładowanie modelu z: {model_path}...")
     model = YOLO(model_path)

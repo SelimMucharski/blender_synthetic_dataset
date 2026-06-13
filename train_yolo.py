@@ -9,6 +9,7 @@ def main():
         data="yolo_dataset/dataset.yaml", 
         epochs=50, 
         imgsz=640,
+        batch = 8,
         # Poprawne parametry zmiany kolorów/jasności (HSV)
         hsv_h=0.2,  # Losowy odcień (0.0 - 1.0)
         hsv_s=0.7,    # Losowe nasycenie (0.0 - 1.0)
